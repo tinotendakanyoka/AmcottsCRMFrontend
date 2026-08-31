@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { API_BASE } from '@/config'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,111 +8,31 @@ const router = createRouter({
   },
   routes: [
     {
+      path: '/dashboard',
+      name: 'Dashboard',
+      component: () => import('../views/Dashboard.vue'),
+      meta: {
+        title: 'Amcotts Dashboard',
+        requiresAuth: true,
+      },
+    },
+    {
       path: '/',
-      name: 'Ecommerce',
-      component: () => import('../views/Ecommerce.vue'),
+      name: 'Dashboard',
+      component: () => import('../views/Dashboard.vue'),
       meta: {
-        title: 'eCommerce Dashboard',
-      },
-    },
-    {
-      path: '/calendar',
-      name: 'Calendar',
-      component: () => import('../views/Others/Calendar.vue'),
-      meta: {
-        title: 'Calendar',
-      },
-    },
-    {
-      path: '/profile',
-      name: 'Profile',
-      component: () => import('../views/Others/UserProfile.vue'),
-      meta: {
-        title: 'Profile',
-      },
-    },
-    {
-      path: '/form-elements',
-      name: 'Form Elements',
-      component: () => import('../views/Forms/FormElements.vue'),
-      meta: {
-        title: 'Form Elements',
-      },
-    },
-    {
-      path: '/basic-tables',
-      name: 'Basic Tables',
-      component: () => import('../views/Tables/BasicTables.vue'),
-      meta: {
-        title: 'Basic Tables',
-      },
-    },
-    {
-      path: '/line-chart',
-      name: 'Line Chart',
-      component: () => import('../views/Chart/LineChart/LineChart.vue'),
-    },
-    {
-      path: '/bar-chart',
-      name: 'Bar Chart',
-      component: () => import('../views/Chart/BarChart/BarChart.vue'),
-    },
-    {
-      path: '/alerts',
-      name: 'Alerts',
-      component: () => import('../views/UiElements/Alerts.vue'),
-      meta: {
-        title: 'Alerts',
-      },
-    },
-    {
-      path: '/avatars',
-      name: 'Avatars',
-      component: () => import('../views/UiElements/Avatars.vue'),
-      meta: {
-        title: 'Avatars',
-      },
-    },
-    {
-      path: '/badge',
-      name: 'Badge',
-      component: () => import('../views/UiElements/Badges.vue'),
-      meta: {
-        title: 'Badge',
+        title: 'Amcotts Dashboard',
+        requiresAuth: true,
       },
     },
 
-    {
-      path: '/buttons',
-      name: 'Buttons',
-      component: () => import('../views/UiElements/Buttons.vue'),
-      meta: {
-        title: 'Buttons',
-      },
-    },
-
-    {
-      path: '/images',
-      name: 'Images',
-      component: () => import('../views/UiElements/Images.vue'),
-      meta: {
-        title: 'Images',
-      },
-    },
-    {
-      path: '/videos',
-      name: 'Videos',
-      component: () => import('../views/UiElements/Videos.vue'),
-      meta: {
-        title: 'Videos',
-      },
-    },
     {
       path: '/blank',
       name: 'Blank',
       component: () => import('../views/Pages/BlankPage.vue'),
       meta: {
         title: 'Blank',
+        requiresAuth: true,
       },
     },
 
@@ -121,6 +42,7 @@ const router = createRouter({
       component: () => import('../views/Errors/FourZeroFour.vue'),
       meta: {
         title: '404 Error',
+        requiresAuth: false,
       },
     },
 
@@ -130,6 +52,7 @@ const router = createRouter({
       component: () => import('../views/Auth/Signin.vue'),
       meta: {
         title: 'Signin',
+        requiresAuth: false,
       },
     },
     {
@@ -138,14 +61,105 @@ const router = createRouter({
       component: () => import('../views/Auth/Signup.vue'),
       meta: {
         title: 'Signup',
+        requiresAuth: false,
       },
     },
+    {
+      path: '/basic-tables',
+      name: 'Basic Tables',
+      component: () => import('../views/Tables/BasicTables.vue'),
+      meta: {
+        title: 'Basic Tables',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/form-elements',
+      name: 'Form Elements',
+      component: () => import('../views/Forms/FormElements.vue'),
+      meta: {
+        title: 'Form Elements',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/create-order',
+      name: 'Create Order',
+      component: () => import('../views/Orders/CreateOrder.vue'),
+      meta: {
+        title: 'Create Order',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/buttons',
+      name: 'Buttons',
+      component: () => import('../views/UiElements/Buttons.vue'),
+      meta: {
+        title: 'Buttons',
+        requiresAuth: true,
+      },
+    }
   ],
 })
 
 export default router
 
-router.beforeEach((to, from, next) => {
-  document.title = `Vue.js ${to.meta.title} | TailAdmin - Vue.js Tailwind CSS Dashboard Template`
-  next()
+router.beforeEach(async (to) => {
+  document.title = `Amcotts ${to.meta.title} | `
+
+  const token = localStorage.getItem('token')
+  console.log('Token from localStorage:', token) // Debugging line to check the token value
+  const isAuthPage = to.path === '/signin' || to.path === '/signup'
+
+  const validateToken = async () => {
+    if (!token) {
+      return false
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/token/validate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ token: token }),
+      })
+
+      if (!response.ok) {
+        localStorage.removeItem('token')
+        return false
+      }
+
+      return true
+    } catch (error) {
+      console.error('Token validation failed:', error)
+      localStorage.removeItem('token')
+      return false
+    }
+  }
+
+  if (isAuthPage) {
+    const isTokenValid = await validateToken()
+    if (isTokenValid) {
+      return '/'
+    }
+    return true
+  }
+
+  if (!to.matched.some((record) => record.meta.requiresAuth)) {
+    return true
+  }
+
+  if (!token) {
+    return '/signin'
+  }
+
+  const isTokenValid = await validateToken()
+  if (!isTokenValid) {
+    return '/signin'
+  }
+
+  return true
 })
