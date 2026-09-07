@@ -60,12 +60,20 @@ import { storeToRefs } from 'pinia'
 import { API_BASE } from '@/config'
 import { useAppDataStore } from '@/stores/appData'
 
+type OptionRecord = {
+  id?: number | string
+  company_name?: string
+  name?: string
+  salesperson_name?: string
+  username?: string
+}
+
 const router = useRouter()
 const appData = useAppDataStore()
 const { selectedCustomer, selectedVehicle } = storeToRefs(appData)
 
-const customers = ref<any[]>([])
-const salespeople = ref<any[]>([])
+const customers = ref<OptionRecord[]>([])
+const salespeople = ref<OptionRecord[]>([])
 
 const form = reactive({
   customer_id: '',

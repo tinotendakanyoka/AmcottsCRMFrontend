@@ -2,10 +2,12 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { API_BASE } from '@/config'
 
+export type AppDataRecord = Record<string, unknown>
+
 export const useAppDataStore = defineStore('appData', () => {
-    const selectedCustomer = ref<any | null>(null)
-    const selectedVehicle = ref<any | null>(null)
-    const userData = ref<any | null>(null)
+    const selectedCustomer = ref<AppDataRecord | null>(null)
+    const selectedVehicle = ref<AppDataRecord | null>(null)
+    const userData = ref<AppDataRecord | null>(null)
 
     const fetchUserData = async (token?: string) => {
         try {
@@ -23,11 +25,11 @@ export const useAppDataStore = defineStore('appData', () => {
         }
     }
 
-    const setSelectedCustomer = (customer: any) => {
+    const setSelectedCustomer = (customer: AppDataRecord | null) => {
         selectedCustomer.value = customer
     }
 
-    const setSelectedVehicle = (vehicle: any) => {
+    const setSelectedVehicle = (vehicle: AppDataRecord | null) => {
         selectedVehicle.value = vehicle
     }
     const isLoading = ref(false)

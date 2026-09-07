@@ -143,6 +143,8 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'SignIn' })
+
 import { ref } from 'vue'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'

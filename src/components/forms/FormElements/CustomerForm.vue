@@ -1,6 +1,6 @@
 <template>
   <div
-  v-if="customers.length > 0"
+  v-if="!isCustomerRole && customers.length > 0"
   class="space-y-4 flex flex-row flex-wrap gap-2 gap-x-12 p-6"
 >
       <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
@@ -167,6 +167,7 @@ const customers = ref<CustomerRecord[]>([])
 const newCustomer = ref(true)
 const selectedCustomerId = ref('')
 const selectedCustomerData = ref<CustomerRecord | null>(null)
+const isCustomerRole = ref(false)
 
 watch(
   () => selectedCustomer.value,
@@ -279,6 +280,29 @@ const getCustomerData = async () => {
   }
 }
 
+const initializeCustomerContext = async () => {
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
+  const role = String(currentUser.role || currentUser.user_type || currentUser.type || '').toLowerCase()
+
+  isCustomerRole.value = role === 'customer'
+
+  if (!isCustomerRole.value) {
+    await getCustomerData()
+    return
+  }
+
+  const customerProfile = currentUser.customer || currentUser.customer_detail || currentUser
+  const customerRecord: CustomerRecord = {
+    ...customerProfile,
+    id: customerProfile.id ?? currentUser.customer_id ?? currentUser.id,
+  }
+
+  newCustomer.value = false
+  selectedCustomerId.value = String(customerRecord.id ?? '')
+  selectedCustomerData.value = customerRecord
+  appDataStore.setSelectedCustomer(customerRecord)
+}
+
 const saveCustomer = async () => {
   try {
     const token = localStorage.getItem('token')
@@ -318,6 +342,6 @@ const saveCustomer = async () => {
 }
 
 onMounted(() => {
-  getCustomerData()
+  initializeCustomerContext()
 })
 </script>

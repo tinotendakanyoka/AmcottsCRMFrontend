@@ -59,12 +59,37 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
 
+type OrderRecord = {
+  id?: number | string
+  customer_id?: number | string | null
+  vehicle_id?: number | string | null
+  status?: string | null
+  signed_by_seller?: boolean
+  signed_by_customer?: boolean
+}
+
+type CustomerRecord = {
+  id?: number | string
+  company_name?: string
+  customer_name?: string
+}
+
+type VehicleRecord = {
+  id?: number | string
+  make?: string
+  model?: string
+}
+
+type UserRecord = {
+  [key: string]: unknown
+}
+
 const route = useRoute()
 const currentPageTitle = ref('Sign Order')
-const order = ref<any | null>(null)
-const customers = ref<any[]>([])
-const vehicles = ref<any[]>([])
-const currentUser = ref<Record<string, any>>({})
+const order = ref<OrderRecord | null>(null)
+const customers = ref<CustomerRecord[]>([])
+const vehicles = ref<VehicleRecord[]>([])
+const currentUser = ref<UserRecord>({})
 const orderId = computed(() => Number(route.params.id))
 
 const getCurrentUser = async () => {
@@ -187,12 +212,12 @@ const fetchOrder = async () => {
   order.value = await response.json()
 }
 
-const getCustomerName = (customerId: number) => {
+const getCustomerName = (customerId: number | string | null | undefined) => {
   const customer = customers.value.find((item) => Number(item.id) === Number(customerId))
   return customer?.company_name || customer?.customer_name || 'Unknown customer'
 }
 
-const getVehicleName = (vehicleId: number) => {
+const getVehicleName = (vehicleId: number | string | null | undefined) => {
   const vehicle = vehicles.value.find((item) => Number(item.id) === Number(vehicleId))
   return vehicle ? `${vehicle.make} ${vehicle.model}` : 'Unknown vehicle'
 }

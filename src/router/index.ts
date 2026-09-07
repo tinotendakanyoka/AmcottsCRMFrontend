@@ -8,9 +8,9 @@ const router = createRouter({
   },
   routes: [
     {
-      path: '/dashboard',
+      path: '/orders',
       name: 'Dashboard',
-      component: () => import('../views/Dashboard.vue'),
+      component: () => import('../views/Orders/ViewOrders.vue'),
       meta: {
         title: 'Amcotts Dashboard',
         requiresAuth: true,
@@ -19,7 +19,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'Dashboard',
-      component: () => import('../views/Dashboard.vue'),
+      component: () => import('../views/Orders/ViewOrders.vue'),
       meta: {
         title: 'Amcotts Dashboard',
         requiresAuth: true,
