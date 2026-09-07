@@ -48,9 +48,31 @@
           </svg>
         </button>
         <HeaderLogo />
+        <div class="flex-1"></div>
+        <button
+          @click="handleLogout"
+          class="flex items-center justify-center w-9 h-9 text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:w-10 lg:h-10 ml-2"
+          title="Logout"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H14M14 3V5C14 5 14 7 14 12C14 17 14 19 14 19M14 3H17M14 19H17M17 12L20 15M20 15L17 18M20 15H11"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
         <button
           @click="toggleApplicationMenu"
-          class="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden"
+          class="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden ml-2"
         >
           <svg
             width="24"
@@ -67,7 +89,6 @@
             />
           </svg>
         </button>
-        <SearchBar />
       </div>
 
       <div
@@ -76,9 +97,7 @@
       >
         <div class="flex items-center gap-2 2xsm:gap-3">
           <ThemeToggler />
-          <NotificationMenu />
         </div>
-        <UserMenu />
       </div>
     </div>
   </header>
@@ -86,13 +105,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useSidebar } from '@/composables/useSidebar'
 import ThemeToggler from '../common/ThemeToggler.vue'
-import SearchBar from './header/SearchBar.vue'
 import HeaderLogo from './header/HeaderLogo.vue'
-import NotificationMenu from './header/NotificationMenu.vue'
-import UserMenu from './header/UserMenu.vue'
 
+const router = useRouter()
 const { toggleSidebar, toggleMobileSidebar, isMobileOpen } = useSidebar()
 
 const handleToggle = () => {
@@ -103,17 +121,15 @@ const handleToggle = () => {
   }
 }
 
-const dropdownOpen = ref(false)
-const notifying = ref(false)
-
-const toggleDropdown = () => {
-  dropdownOpen.value = !dropdownOpen.value
-  notifying.value = false
-}
-
 const isApplicationMenuOpen = ref(false)
 
 const toggleApplicationMenu = () => {
   isApplicationMenuOpen.value = !isApplicationMenuOpen.value
+}
+
+const handleLogout = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  router.push('/signin')
 }
 </script>

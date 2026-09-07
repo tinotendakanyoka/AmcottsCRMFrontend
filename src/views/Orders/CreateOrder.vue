@@ -6,44 +6,42 @@
         <ComponentCard title="Customer Information">
           <CustomerForm />
         </ComponentCard>
-        <ComponentCard title="Select Inputs">
-          <SelectInput />
-        </ComponentCard>
-        <ComponentCard title="Inputs States">
-          <TextArea />
-        </ComponentCard>
-        <ComponentCard title="Inputs States">
-          <InputState />
-        </ComponentCard>
       </div>
       <div class="space-y-6">
-        <ComponentCard title="Inputs Group"> <InputGroup /> </ComponentCard>
-        <ComponentCard title="File Input"> <FileInput /> </ComponentCard>
-        <ComponentCard title="Checkboxes">
-          <CheckboxInput />
-        </ComponentCard>
-        <ComponentCard title="Dropzone">
-          <Dropzone />
-        </ComponentCard>
+        <ComponentCard title="Vehicle Information"> <VehicleForm /> </ComponentCard>
       </div>
+      
+      
     </div>
+    <div class="w-full p-6">
+        <ComponentCard title="Order Information"> <OrderForm /> </ComponentCard>
+      </div>
   </AdminLayout>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { ref, watch } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
-import DefaultInputs from '@/components/forms/FormElements/DefaultInputs.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
-import SelectInput from '@/components/forms/FormElements/SelectInput.vue'
-import InputState from '@/components/forms/FormElements/InputState.vue'
-import TextArea from '@/components/forms/FormElements/TextArea.vue'
-import InputGroup from '@/components/forms/FormElements/InputGroup.vue'
-import Dropzone from '@/components/forms/FormElements/Dropzone.vue'
-import FileInput from '@/components/forms/FormElements/FileInput.vue'
-import CheckboxInput from '@/components/forms/FormElements/CheckboxInput.vue'
+import OrderForm from '@/components/forms/FormElements/OrderForm.vue'
 import CustomerForm from '@/components/forms/FormElements/CustomerForm.vue'
+import VehicleForm from '@/components/forms/FormElements/VehicleForm.vue'
+
+import { storeToRefs } from 'pinia'
+import { useAppDataStore } from '@/stores/appData'
+
+const appData = useAppDataStore()
+const { selectedCustomer } = storeToRefs(appData)
+
+watch(selectedCustomer, (newCustomer) => {
+  if (newCustomer) {
+    const customerName = newCustomer.company_name || newCustomer.customer_name || newCustomer.name || 'Customer'
+    currentPageTitle.value = `Create Order for ${customerName}`
+  } else {
+    currentPageTitle.value = 'Create Order'
+  }
+})
 
 const currentPageTitle = ref('Create Order')
 </script>

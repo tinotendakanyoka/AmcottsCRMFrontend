@@ -182,7 +182,51 @@ const handleSubmit = async () => {
   const data = await response.json()
   if (response.ok){
     console.log('Login successful:', data)
-    localStorage.setItem('token', data.access_token)
+    const token = data.access_token || data.token
+    localStorage.setItem('token', token)
+
+    let userProfile = data.user || data.user_data || data.current_user || {}
+
+    if (!userProfile.role && token) {
+      try {
+        const meResponse = await fetch(`${API_BASE}/users/me`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (meResponse.ok) {
+          userProfile = await meResponse.json()
+        }
+      } catch (error) {
+        console.warn('Could not load current user from /users/me:', error)
+      }
+    }
+
+    if (!userProfile.role && token) {
+      try {
+        const payloadPart = token.split('.')[1]
+        const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/')
+        const decoded = JSON.parse(
+          decodeURIComponent(
+            atob(normalized)
+              .split('')
+              .map((char) => `%${('00' + char.charCodeAt(0).toString(16)).slice(-2)}`)
+              .join('')
+          )
+        )
+        userProfile = { ...decoded, ...userProfile }
+      } catch (error) {
+        console.warn('Could not decode auth token for user role:', error)
+      }
+    }
+
+    if (Object.keys(userProfile).length) {
+      localStorage.setItem('user', JSON.stringify(userProfile))
+    }
+
     await router.push('/')
   } else {
     loginError.value = data.detail || 'Login failed. Please try again.'

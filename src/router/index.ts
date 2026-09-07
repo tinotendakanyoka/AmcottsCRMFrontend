@@ -83,11 +83,65 @@ const router = createRouter({
       },
     },
     {
+      path: '/orders',
+      name: 'View Orders',
+      component: () => import('../views/Orders/ViewOrders.vue'),
+      meta: {
+        title: 'Orders',
+        requiresAuth: true,
+      },
+    },
+    {
       path: '/create-order',
       name: 'Create Order',
       component: () => import('../views/Orders/CreateOrder.vue'),
       meta: {
         title: 'Create Order',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/orders/:id/edit',
+      name: 'Edit Order',
+      component: () => import('../views/Orders/EditOrder.vue'),
+      meta: {
+        title: 'Edit Order',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/orders/:id/sign',
+      name: 'Sign Order',
+      component: () => import('../views/Orders/SignOrder.vue'),
+      meta: {
+        title: 'Sign Order',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/contracts',
+      name: 'View Contracts',
+      component: () => import('../views/Contracts/ViewContracts.vue'),
+      meta: {
+        title: 'Contracts',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/contracts/create',
+      name: 'Create Contract',
+      component: () => import('../views/Contracts/CreateContract.vue'),
+      meta: {
+        title: 'Create Contract',
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/contracts/:id/sign',
+      name: 'Sign Contract',
+      component: () => import('../views/Contracts/SignContract.vue'),
+      meta: {
+        title: 'Sign Contract',
         requiresAuth: true,
       },
     },

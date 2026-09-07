@@ -296,7 +296,8 @@
             <common-grid-shape />
             <div class="flex flex-col items-center max-w-xs">
               <router-link to="/" class="block mb-4">
-                <img width="{231}" height="{48}" src="/images/logo/auth-logo.svg" alt="Logo" />
+                <img class="dark:hidden" width="231" height="48" src="/images/logo/logo-light.png" alt="Logo" />
+                <img class="hidden dark:block" width="231" height="48" src="/images/logo/logo-dark.png" alt="Logo" />
               </router-link>
               <p class="text-center text-gray-400 dark:text-white/60">
                 Free and Open-Source Tailwind CSS Admin Dashboard Template
