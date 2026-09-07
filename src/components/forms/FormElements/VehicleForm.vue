@@ -1,17 +1,6 @@
 <template>
   <div class="space-y-5 p-2">
-    <div class="space-y-2">
-      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Select vehicle</label>
-      <select v-model="selectedVehicleId" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-        <option value="">Select a vehicle</option>
-        <option value="new">Add New Vehicle</option>
-        <option v-for="vehicle in vehicles" :key="vehicle.id" :value="String(vehicle.id)">
-          {{ vehicle.make }} {{ vehicle.model }}
-        </option>
-      </select>
-    </div>
-
-    <div v-if="newVehicle" class="grid gap-5 md:grid-cols-2">
+    <div class="grid gap-5 md:grid-cols-2">
       <div>
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Make</label>
         <input v-model="form.make" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
@@ -80,7 +69,7 @@
       </div>
     </div>
 
-    <div v-if="newVehicle" class="flex items-center justify-end pt-2">
+    <div class="flex items-center justify-end pt-2">
       <button type="button" @click="saveVehicle" class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-600 focus:outline-none focus:ring-4 focus:ring-brand-300 dark:focus:ring-brand-900">
         Save Vehicle
       </button>
@@ -89,17 +78,11 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue'
-import { storeToRefs } from 'pinia'
+import { reactive } from 'vue'
 import { API_BASE } from '@/config'
 import { useAppDataStore } from '@/stores/appData'
 
 const appDataStore = useAppDataStore()
-const { selectedVehicle } = storeToRefs(appDataStore)
-
-const vehicles = ref<any[]>([])
-const selectedVehicleId = ref('')
-const newVehicle = ref(false)
 
 const form = reactive({
   make: '',
@@ -115,48 +98,6 @@ const form = reactive({
   reflective_tape: false,
   multi_functional_steering: false,
 })
-
-watch(
-  () => selectedVehicle.value,
-  (vehicle) => {
-    selectedVehicleId.value = vehicle ? String(vehicle.id ?? '') : ''
-    newVehicle.value = !vehicle
-  },
-  { immediate: true }
-)
-
-watch(selectedVehicleId, (vehicleId) => {
-  if (!vehicleId) {
-    appDataStore.setSelectedVehicle(null)
-    newVehicle.value = true
-    return
-  }
-
-  if (vehicleId === 'new') {
-    appDataStore.setSelectedVehicle(null)
-    newVehicle.value = true
-    return
-  }
-
-  const vehicle = vehicles.value.find((item) => String(item.id ?? '') === String(vehicleId))
-  appDataStore.setSelectedVehicle(vehicle || null)
-  newVehicle.value = false
-})
-
-const fetchVehicles = async () => {
-  const token = localStorage.getItem('token')
-  const response = await fetch(`${API_BASE}/vehicles/`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  })
-
-  if (response.ok) {
-    vehicles.value = await response.json()
-  }
-}
 
 const saveVehicle = async () => {
   const token = localStorage.getItem('token')
@@ -191,13 +132,6 @@ const saveVehicle = async () => {
   }
 
   const savedVehicle = await response.json()
-  await fetchVehicles()
-  selectedVehicleId.value = String(savedVehicle.id ?? '')
   appDataStore.setSelectedVehicle(savedVehicle)
-  newVehicle.value = false
 }
-
-onMounted(async () => {
-  await fetchVehicles()
-})
 </script>

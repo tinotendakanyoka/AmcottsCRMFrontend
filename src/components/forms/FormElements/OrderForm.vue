@@ -12,16 +12,6 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Vehicle</label>
-        <select v-model="form.vehicle_id" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-          <option value="">Select vehicle</option>
-          <option v-for="vehicle in vehicles" :key="vehicle.id" :value="vehicle.id">
-            {{ vehicle.make }} {{ vehicle.model }}
-          </option>
-        </select>
-      </div>
-
-      <div>
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Salesperson</label>
         <select v-model="form.salesperson_id" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
           <option value="">Select salesperson</option>
@@ -64,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { API_BASE } from '@/config'
@@ -75,7 +65,6 @@ const appData = useAppDataStore()
 const { selectedCustomer, selectedVehicle } = storeToRefs(appData)
 
 const customers = ref<any[]>([])
-const vehicles = ref<any[]>([])
 const salespeople = ref<any[]>([])
 
 const form = reactive({
@@ -111,20 +100,6 @@ const fetchCustomers = async () => {
   })
   if (response.ok) {
     customers.value = await response.json()
-  }
-}
-
-const fetchVehicles = async () => {
-  const token = localStorage.getItem('token')
-  const response = await fetch(`${API_BASE}/vehicles/`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  })
-  if (response.ok) {
-    vehicles.value = await response.json()
   }
 }
 
@@ -173,7 +148,7 @@ const saveOrder = async () => {
 }
 
 onMounted(async () => {
-  await Promise.all([fetchCustomers(), fetchVehicles(), fetchSalespeople()])
+  await Promise.all([fetchCustomers(), fetchSalespeople()])
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
   if (currentUser.id && !form.salesperson_id) {
     form.salesperson_id = String(currentUser.id)
