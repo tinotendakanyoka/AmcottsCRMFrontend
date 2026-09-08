@@ -149,7 +149,7 @@
             <common-grid-shape />
             <div class="flex flex-col items-center max-w-xs">
               <router-link to="/" class="block mb-4">
-                <img class="dark:hidden" width="231" height="48" src="/images/logo/logo-light.png" alt="Logo" />
+                <img class="dark:hidden" width="231" height="48" src="/images/logo/logo-dark.png" alt="Logo" />
                 <img class="hidden dark:block" width="231" height="48" src="/images/logo/logo-dark.png" alt="Logo" />
               </router-link>
             </div>
