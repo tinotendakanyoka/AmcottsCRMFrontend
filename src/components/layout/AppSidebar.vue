@@ -211,27 +211,16 @@
   </aside>
 </template>
 
-<script setup>
-import { ref, computed } from "vue";
+<script setup lang="ts">
+import { computed } from "vue";
 import { useRoute } from "vue-router";
 
 import {
-  GridIcon,
-  CalenderIcon,
-  UserCircleIcon,
-  ChatIcon,
-  MailIcon,
-  DocsIcon,
-  PieChartIcon,
   ChevronDownIcon,
   HorizontalDots,
   PageIcon,
-  TableIcon,
   ListIcon,
-  PlugInIcon,
 } from "../../icons";
-import SidebarWidget from "./SidebarWidget.vue";
-import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
 import { useSidebar } from "@/composables/useSidebar";
 
 const route = useRoute();
@@ -250,14 +239,14 @@ const menuGroups = [
           { name: "Create Order", path: "/create-order", pro: false },
         ],
       },
-      {
+/*       {
         name: "Sales Contracts",
         icon: PageIcon,
         subItems: [
           { name: "Create Contract", path: "/contracts/create", pro: false },
           { name: "View Contracts", path: "/contracts", pro: false },
         ],
-      },
+      }, */
     ],
   },
 ];
