@@ -1,5 +1,9 @@
 <template>
   <form class="space-y-5" @submit.prevent="saveOrder">
+    <div v-if="errorMessage" role="alert" class="rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-800 dark:bg-error-500/10 dark:text-error-400">
+      {{ errorMessage }}
+    </div>
+
     <div class="grid gap-5 md:grid-cols-2">
       <div>
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Customer</label>
@@ -46,8 +50,8 @@
       <router-link to="/orders" class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
         Cancel
       </router-link>
-      <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-600 focus:outline-none focus:ring-4 focus:ring-brand-300 dark:focus:ring-brand-900">
-        Create Order
+      <button type="submit" :disabled="isSaving" class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-4 focus:ring-brand-300 dark:focus:ring-brand-900">
+        {{ isSaving ? 'Creating...' : 'Create Order' }}
       </button>
     </div>
   </form>
@@ -74,6 +78,8 @@ const { selectedCustomer, selectedVehicle } = storeToRefs(appData)
 
 const customers = ref<OptionRecord[]>([])
 const salespeople = ref<OptionRecord[]>([])
+const errorMessage = ref('')
+const isSaving = ref(false)
 
 const form = reactive({
   customer_id: '',
@@ -125,6 +131,10 @@ const fetchSalespeople = async () => {
 }
 
 const saveOrder = async () => {
+  if (isSaving.value) return
+
+  errorMessage.value = ''
+  isSaving.value = true
   const token = localStorage.getItem('token')
   const payload = {
     customer_id: Number(form.customer_id) || null,
@@ -136,23 +146,43 @@ const saveOrder = async () => {
     expected_delivery_date: form.expected_delivery_date || null,
   }
 
-  const response = await fetch(`${API_BASE}/orders/create`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  })
+  try {
+    const response = await fetch(`${API_BASE}/orders/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    })
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error('Failed to create order:', errorText)
-    return
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => null)
+      throw new Error(formatApiError(errorBody, response.status))
+    }
+
+    localStorage.setItem('orderSuccessMessage', 'Order created successfully.')
+    router.push('/orders')
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Unable to create the order. Please try again.'
+  } finally {
+    isSaving.value = false
+  }
+}
+
+const formatApiError = (body: unknown, status: number) => {
+  if (body && typeof body === 'object' && 'detail' in body) {
+    const detail = body.detail
+    if (Array.isArray(detail)) {
+      return detail.map((item) => {
+        if (item && typeof item === 'object' && 'msg' in item) return String(item.msg)
+        return String(item)
+      }).join(' ')
+    }
+    if (detail) return String(detail)
   }
 
-  localStorage.setItem('orderSuccessMessage', 'Order created successfully.')
-  router.push('/orders')
+  return `Unable to create the order (request failed with status ${status}).`
 }
 
 onMounted(async () => {

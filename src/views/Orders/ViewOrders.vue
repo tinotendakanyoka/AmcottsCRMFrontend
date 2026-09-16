@@ -55,6 +55,9 @@
                   <router-link :to="`/orders/${order.id}/sign`" class="rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-600">
                     Sign
                   </router-link>
+                  <button type="button" class="rounded-lg border border-brand-300 px-3 py-1.5 text-xs font-medium text-brand-600 hover:bg-brand-50 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-brand-500/10" @click="openNotifyModal(order)">
+                    Notify
+                  </button>
                 </div>
               </td>
             </tr>
@@ -62,6 +65,38 @@
         </table>
       </div>
     </ComponentCard>
+
+    <div v-if="orderToNotify" class="fixed inset-0 z-[99999] flex items-center justify-center bg-gray-900/50 p-4" @click.self="closeNotifyModal">
+      <div class="w-full max-w-lg rounded-xl bg-white p-6 shadow-theme-xl dark:bg-gray-900">
+        <div class="mb-5 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Notify order #{{ orderToNotify.id }}</h2>
+          <button type="button" aria-label="Close notification form" class="text-2xl leading-none text-gray-500 hover:text-gray-800 dark:hover:text-white" @click="closeNotifyModal">&times;</button>
+        </div>
+        <form class="space-y-4" @submit.prevent="notifyOrder">
+          <div>
+            <label for="notify-emails" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Email addresses</label>
+            <textarea id="notify-emails" v-model="notifyForm.emails" rows="3" placeholder="name@example.com, another@example.com" class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90" />
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Separate multiple addresses with commas or new lines.</p>
+          </div>
+          <div v-if="currentUser.id">
+            <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-400">Users</p>
+            <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <input v-model="notifyForm.userIds" type="checkbox" :value="Number(currentUser.id)" class="rounded border-gray-300 text-brand-500" />
+              {{ currentUser.username || currentUser.email }}
+            </label>
+          </div>
+          <div>
+            <label for="notify-message" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Message</label>
+            <textarea id="notify-message" v-model="notifyForm.message" rows="4" required placeholder="Add a message for the recipients" class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90" />
+          </div>
+          <p v-if="notifyError" class="text-sm text-error-600">{{ notifyError }}</p>
+          <div class="flex justify-end gap-3 pt-2">
+            <button type="button" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-700 dark:text-gray-300" @click="closeNotifyModal">Cancel</button>
+            <button type="submit" :disabled="isNotifying" class="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60">{{ isNotifying ? 'Sending...' : 'Send notification' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </AdminLayout>
 </template>
 
@@ -93,12 +128,23 @@ type VehicleRecord = {
   model?: string
 }
 
+type UserRecord = {
+  id?: number | string
+  username?: string
+  email?: string
+}
+
 const currentPageTitle = ref('Orders')
 const orders = ref<OrderRecord[]>([])
 const customers = ref<CustomerRecord[]>([])
 const vehicles = ref<VehicleRecord[]>([])
 const successMessage = ref('')
 const selectedStatus = ref('all')
+const orderToNotify = ref<OrderRecord | null>(null)
+const isNotifying = ref(false)
+const notifyError = ref('')
+const currentUser = ref<UserRecord>({})
+const notifyForm = ref({ emails: '', userIds: [] as number[], message: '' })
 
 const availableStatuses = computed(() => {
   const statuses = new Set(['Draft', 'In Progress', 'Completed', 'Cancelled'])
@@ -158,6 +204,55 @@ const getStatusClasses = (status: string | null | undefined) => {
       return 'bg-gray-100 text-gray-700 dark:bg-gray-500/15 dark:text-gray-400'
     default:
       return 'bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-400'
+  }
+}
+
+const openNotifyModal = (order: OrderRecord) => {
+  orderToNotify.value = order
+  notifyError.value = ''
+  notifyForm.value = { emails: '', userIds: [], message: '' }
+}
+
+const closeNotifyModal = () => {
+  if (isNotifying.value) return
+  orderToNotify.value = null
+}
+
+const notifyOrder = async () => {
+  if (!orderToNotify.value?.id) return
+  const emails = notifyForm.value.emails
+    .split(/[\n,;]/)
+    .map((email) => email.trim())
+    .filter(Boolean)
+
+  if (emails.length === 0 && notifyForm.value.userIds.length === 0) {
+    notifyError.value = 'Add at least one email address or select a user.'
+    return
+  }
+
+  isNotifying.value = true
+  notifyError.value = ''
+  try {
+    const response = await fetch(`${API_BASE}/orders/${orderToNotify.value.id}/notify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({
+        order_id: Number(orderToNotify.value.id),
+        message: notifyForm.value.message || null,
+        emails: emails.length ? emails : null,
+        user_ids: notifyForm.value.userIds.length ? notifyForm.value.userIds : null,
+      }),
+    })
+    if (!response.ok) throw new Error(await response.text())
+    successMessage.value = 'Order notification sent.'
+    closeNotifyModal()
+  } catch (error) {
+    notifyError.value = error instanceof Error ? error.message : 'Failed to send notification'
+  } finally {
+    isNotifying.value = false
   }
 }
 
@@ -224,6 +319,7 @@ onMounted(async () => {
     }
 
     await Promise.all([fetchCustomers(), fetchVehicles(), fetchOrders()])
+    currentUser.value = JSON.parse(localStorage.getItem('user') || '{}')
   } catch (error) {
     console.error('Error loading orders:', error)
   }

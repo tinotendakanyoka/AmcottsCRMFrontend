@@ -258,14 +258,14 @@ const menuGroups: MenuGroup[] = [
           { name: "Create Order", path: "/create-order", pro: false },
         ],
       },
-/*       {
+   {
         name: "Sales Contracts",
         icon: PageIcon,
         subItems: [
           { name: "Create Contract", path: "/contracts/create", pro: false },
           { name: "View Contracts", path: "/contracts", pro: false },
         ],
-      }, */
+      }, 
     ],
   },
 ];
