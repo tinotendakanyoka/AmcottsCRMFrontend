@@ -30,6 +30,10 @@
           <option value="Manual">Manual</option>
         </select>
       </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">VIN / Chassis number</label>
+        <input v-model="form.chassis_number" :disabled="isSubmitted" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+      </div>
 
       <div>
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Colour</label>
@@ -111,6 +115,7 @@ const form = reactive({
   model: '',
   engine: '',
   transmission: '',
+  chassis_number: '',
   color: '',
   tyre_size_and_make: '',
   modifications_special_instructions: '',
@@ -162,6 +167,7 @@ const saveVehicle = async () => {
     vid_or_cof: form.vid_or_cof,
     sign_writing: form.sign_writing,
     reflective_tape: form.reflective_tape,
+    chassis_number: form.chassis_number || null,
     extra_options: form.extra_options || null,
     tyre_size_and_make: form.tyre_size_and_make || null,
     multi_functional_steering: form.multi_functional_steering,
