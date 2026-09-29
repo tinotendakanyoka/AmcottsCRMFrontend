@@ -78,6 +78,62 @@
               <input v-model="form.multi_functional_steering" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
               <span class="text-sm text-gray-700 dark:text-gray-400">Multi-function Steering Wheel</span>
             </label>
+
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input v-model="form.vid" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
+                <span class="text-sm text-gray-700 dark:text-gray-400">VID</span>
+              </label>
+              <input v-if="form.vid" v-model.number="form.vid_value" type="number" min="0" step="0.01" placeholder="VID value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+            </div>
+
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input v-model="form.cof" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
+                <span class="text-sm text-gray-700 dark:text-gray-400">COF</span>
+              </label>
+              <input v-if="form.cof" v-model.number="form.cof_value" type="number" min="0" step="0.01" placeholder="COF value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+            </div>
+
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input v-model="form.cvr" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
+                <span class="text-sm text-gray-700 dark:text-gray-400">CVR</span>
+              </label>
+              <input v-if="form.cvr" v-model.number="form.cvr_value" type="number" min="0" step="0.01" placeholder="CVR value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+            </div>
+
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input v-model="form.zbc" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
+                <span class="text-sm text-gray-700 dark:text-gray-400">ZBC</span>
+              </label>
+              <input v-if="form.zbc" v-model.number="form.zbc_value" type="number" min="0" step="0.01" placeholder="ZBC value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+            </div>
+
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input v-model="form.zrp" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
+                <span class="text-sm text-gray-700 dark:text-gray-400">ZRP</span>
+              </label>
+              <input v-if="form.zrp" v-model.number="form.zrp_value" type="number" min="0" step="0.01" placeholder="ZRP value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+            </div>
+
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input v-model="form.insurance" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
+                <span class="text-sm text-gray-700 dark:text-gray-400">Insurance</span>
+              </label>
+              <input v-if="form.insurance" v-model.number="form.insurance_value" type="number" min="0" step="0.01" placeholder="Insurance value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+            </div>
+
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input v-model="form.zinara" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
+                <span class="text-sm text-gray-700 dark:text-gray-400">Zinara</span>
+              </label>
+              <input v-if="form.zinara" v-model.number="form.zinara_value" type="number" min="0" step="0.01" placeholder="Zinara value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+            </div>
           </div>
         </fieldset>
       </div>
@@ -124,6 +180,20 @@ const form = reactive({
   sign_writing: false,
   reflective_tape: false,
   multi_functional_steering: false,
+  vid: false,
+  cof: false,
+  cvr: false,
+  zbc: false,
+  zrp: false,
+  insurance: false,
+  zinara: false,
+  vid_value: null as number | null,
+  cof_value: null as number | null,
+  cvr_value: null as number | null,
+  zbc_value: null as number | null,
+  zrp_value: null as number | null,
+  insurance_value: null as number | null,
+  zinara_value: null as number | null,
 })
 
 const fetchMakes = async () => {
@@ -172,6 +242,20 @@ const saveVehicle = async () => {
     tyre_size_and_make: form.tyre_size_and_make || null,
     multi_functional_steering: form.multi_functional_steering,
     modifications_special_instructions: form.modifications_special_instructions || null,
+    vid: form.vid,
+    cof: form.cof,
+    cvr: form.cvr,
+    zbc: form.zbc,
+    zrp: form.zrp,
+    insurance: form.insurance,
+    zinara: form.zinara,
+    vid_value: form.vid ? form.vid_value : null,
+    cof_value: form.cof ? form.cof_value : null,
+    cvr_value: form.cvr ? form.cvr_value : null,
+    zbc_value: form.zbc ? form.zbc_value : null,
+    zrp_value: form.zrp ? form.zrp_value : null,
+    insurance_value: form.insurance ? form.insurance_value : null,
+    zinara_value: form.zinara ? form.zinara_value : null,
   }
 
   try {
