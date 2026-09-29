@@ -21,18 +21,19 @@
         </div>
 
         <div class="grid gap-5 md:grid-cols-2">
-          <div><label :class="labelClass">Purchase price</label><input v-model.number="form.purchase_price" type="number" min="0" step="0.01" :class="inputClass" /></div>
-          <div><label :class="labelClass">Purchase price in words</label><input v-model="form.purchase_price_in_words" :class="inputClass" /></div>
+          <div><label :class="labelClass">Purchase price before VAT</label><div class="relative"><span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">$</span><input v-model.number="form.purchase_price_before_vat" type="number" min="0" step="0.01" :class="`${inputClass} pl-8`" /></div></div>
+          <div><label :class="labelClass">Total purchase price</label><div class="relative"><span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">$</span><input v-model.number="form.total_purchase_price" type="number" min="0" step="0.01" :class="`${inputClass} pl-8`" /></div></div>
+          <div><label :class="labelClass">Total purchase price in words</label><input v-model="form.total_purchase_price_in_words" :class="inputClass" /></div>
           <label class="flex items-center gap-2 cursor-pointer pt-2"><input v-model="form.vat_inclusive" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" /><span class="text-sm text-gray-700 dark:text-gray-400">VAT inclusive</span></label>
           <div><label :class="labelClass">VAT percentage</label><input v-model.number="form.vat_amount_percentage" type="number" min="0" step="0.01" :class="inputClass" /></div>
         </div>
 
         <div class="grid gap-5 md:grid-cols-2">
-          <div><label :class="labelClass">Initial deposit</label><input v-model.number="form.initial_deposit" type="number" min="0" step="0.01" :class="inputClass" /></div>
+          <div><label :class="labelClass">Initial deposit</label><div class="relative"><span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">$</span><input v-model.number="form.initial_deposit" type="number" min="0" step="0.01" :class="`${inputClass} pl-8`" /></div></div>
           <div><label :class="labelClass">Initial deposit in words</label><input v-model="form.initial_deposit_in_words" :class="inputClass" /></div>
           <div><label :class="labelClass">Initial deposit date</label><input v-model="form.initial_deposit_date" type="date" :class="inputClass" /></div>
           <div><label :class="labelClass">Contract date</label><input v-model="form.contract_date" type="date" :class="inputClass" /></div>
-          <div><label :class="labelClass">Balance due</label><input v-model.number="form.balance_due" type="number" min="0" step="0.01" :class="inputClass" /></div>
+          <div><label :class="labelClass">Balance due</label><div class="relative"><span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">$</span><input v-model.number="form.balance_due" type="number" min="0" step="0.01" :class="`${inputClass} pl-8`" /></div></div>
           <div><label :class="labelClass">Balance due in words</label><input v-model="form.balance_due_in_words" :class="inputClass" /></div>
           <div class="md:col-span-2"><label :class="labelClass">Balance terms</label><textarea v-model="form.balance_terms" rows="3" :class="inputClass" /></div>
         </div>
@@ -75,7 +76,7 @@ const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gra
 
 const form = reactive({
   order_id: '', seller_name: '', seller_address: '', customer_name: '', customer_details: '', customer_address: '',
-  purchase_price: null as number | null, purchase_price_in_words: '', vat_inclusive: false, vat_amount_percentage: null as number | null,
+  purchase_price_before_vat: null as number | null, total_purchase_price: null as number | null, total_purchase_price_in_words: '', vat_inclusive: false, vat_amount_percentage: null as number | null,
   initial_deposit: null as number | null, initial_deposit_in_words: '', initial_deposit_date: '', balance_due: null as number | null,
   balance_due_in_words: '', balance_terms: '', contract_date: '',
 })
@@ -120,8 +121,8 @@ const submitContract = async () => {
     const payload = {
       order_id: Number(form.order_id), seller_name: toNullableText(form.seller_name), seller_address: toNullableText(form.seller_address),
       customer_name: toNullableText(form.customer_name), customer_details: toNullableText(form.customer_details), customer_address: toNullableText(form.customer_address),
-      purchase_price: form.purchase_price, purchase_price_in_words: toNullableText(form.purchase_price_in_words), vat_inclusive: form.vat_inclusive,
-      vat_amount_percentage: form.vat_amount_percentage, initial_deposit: form.initial_deposit, initial_deposit_in_words: toNullableText(form.initial_deposit_in_words),
+      purchase_price_before_vat: form.purchase_price_before_vat, vat_inclusive: form.vat_inclusive,
+      vat_amount_percentage: form.vat_amount_percentage, total_purchase_price: form.total_purchase_price, total_purchase_price_in_words: toNullableText(form.total_purchase_price_in_words), initial_deposit: form.initial_deposit, initial_deposit_in_words: toNullableText(form.initial_deposit_in_words),
       initial_deposit_date: toDateTime(form.initial_deposit_date), balance_due: form.balance_due, balance_due_in_words: toNullableText(form.balance_due_in_words),
       balance_terms: toNullableText(form.balance_terms), contract_date: toDateTime(form.contract_date),
     }

@@ -45,7 +45,7 @@
                   {{ order.status || 'Draft' }}
                 </span>
               </td>
-              <td class="px-4 py-3">{{ order.deposit_amount ? formatCurrency(order.deposit_amount) : '—' }}</td>
+              <td class="px-4 py-3">{{ order.deposit_amount !== null && order.deposit_amount !== undefined && order.deposit_amount !== '' ? formatCurrency(order.deposit_amount) : '—' }}</td>
               <td class="px-4 py-3">{{ order.expected_delivery_date ? formatDate(order.expected_delivery_date) : '—' }}</td>
               <td class="px-4 py-3">
                 <div class="flex justify-end gap-2">
@@ -167,9 +167,9 @@ const filteredOrders = computed(() => {
 })
 
 const formatCurrency = (value: number | string) =>
-  new Intl.NumberFormat('en-ZA', {
+  new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'ZAR',
+    currency: 'USD',
     maximumFractionDigits: 2,
   }).format(Number(value))
 

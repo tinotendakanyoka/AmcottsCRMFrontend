@@ -7,7 +7,7 @@
     <div class="grid gap-5 md:grid-cols-2">
       <div>
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Customer</label>
-        <select v-model="form.customer_id" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+        <select v-model="form.customer_id" required class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
           <option value="">Select customer</option>
           <option v-for="customer in customers" :key="customer.id" :value="customer.id">
             {{ customer.company_name || customer.name || 'Customer' }}
@@ -17,7 +17,7 @@
 
       <div>
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Salesperson</label>
-        <select v-model="form.salesperson_id" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+        <select v-model="form.salesperson_id" required class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
           <option value="">Select salesperson</option>
           <option v-for="person in salespeople" :key="person.id" :value="person.id">
             {{ person.salesperson_name || person.username || 'Salesperson' }}
@@ -26,13 +26,11 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Order status</label>
-        <input v-model="form.status" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" placeholder="Draft" />
-      </div>
-
-      <div>
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Deposit amount</label>
-        <input v-model="form.deposit_amount" type="number" step="0.01" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+        <div class="relative">
+          <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">$</span>
+          <input v-model="form.deposit_amount" type="number" step="0.01" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-8 pr-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+        </div>
       </div>
 
       <div>
@@ -43,6 +41,11 @@
       <div class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Port to be shipped to</label>
         <input v-model="form.port_to_be_shipped" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" placeholder="Port of Durban" />
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Deposit receipt reference number</label>
+        <input v-model="form.deposit_receipt_referrence_number" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
       </div>
     </div>
 
@@ -85,10 +88,10 @@ const form = reactive({
   customer_id: '',
   salesperson_id: '',
   vehicle_id: '',
-  status: 'Draft',
   deposit_amount: '',
   expected_delivery_date: '',
   port_to_be_shipped: '',
+  deposit_receipt_referrence_number: '',
 })
 
 watch(selectedCustomer, (customer) => {
@@ -140,10 +143,10 @@ const saveOrder = async () => {
     customer_id: Number(form.customer_id) || null,
     salesperson_id: Number(form.salesperson_id) || null,
     vehicle_id: Number(form.vehicle_id) || null,
-    status: form.status || 'Draft',
     deposit_amount: form.deposit_amount ? Number(form.deposit_amount) : null,
     port_to_be_shipped: form.port_to_be_shipped || null,
-    expected_delivery_date: form.expected_delivery_date || null,
+    expected_delivery_date: form.expected_delivery_date ? `${form.expected_delivery_date}T00:00:00.000Z` : null,
+    deposit_receipt_referrence_number: form.deposit_receipt_referrence_number || null,
   }
 
   try {

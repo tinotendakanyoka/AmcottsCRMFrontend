@@ -55,6 +55,11 @@
         <input v-model="form.extra_options" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
       </div>
 
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Petty cash voucher number</label>
+        <input v-model="form.petty_cash_voucher_number" :disabled="isSubmitted" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+      </div>
+
       <div class="md:col-span-2">
         <fieldset class="space-y-3">
           <legend class="text-sm font-medium text-gray-700 dark:text-gray-400">Vehicle Specifications</legend>
@@ -84,7 +89,7 @@
                 <input v-model="form.vid" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
                 <span class="text-sm text-gray-700 dark:text-gray-400">VID</span>
               </label>
-              <input v-if="form.vid" v-model.number="form.vid_value" type="number" min="0" step="0.01" placeholder="VID value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                <div v-if="form.vid" class="relative"><span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">$</span><input v-model.number="form.vid_value" type="number" min="0" step="0.01" placeholder="VID value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-8 pr-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" /></div>
             </div>
 
             <div class="space-y-2">
@@ -92,7 +97,6 @@
                 <input v-model="form.cof" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
                 <span class="text-sm text-gray-700 dark:text-gray-400">COF</span>
               </label>
-              <input v-if="form.cof" v-model.number="form.cof_value" type="number" min="0" step="0.01" placeholder="COF value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
             </div>
 
             <div class="space-y-2">
@@ -100,7 +104,7 @@
                 <input v-model="form.cvr" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
                 <span class="text-sm text-gray-700 dark:text-gray-400">CVR</span>
               </label>
-              <input v-if="form.cvr" v-model.number="form.cvr_value" type="number" min="0" step="0.01" placeholder="CVR value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                <div v-if="form.cvr" class="relative"><span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">$</span><input v-model.number="form.cvr_value" type="number" min="0" step="0.01" placeholder="CVR value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-8 pr-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" /></div>
             </div>
 
             <div class="space-y-2">
@@ -108,7 +112,7 @@
                 <input v-model="form.zbc" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
                 <span class="text-sm text-gray-700 dark:text-gray-400">ZBC</span>
               </label>
-              <input v-if="form.zbc" v-model.number="form.zbc_value" type="number" min="0" step="0.01" placeholder="ZBC value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                <div v-if="form.zbc" class="relative"><span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">$</span><input v-model.number="form.zbc_value" type="number" min="0" step="0.01" placeholder="ZBC value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-8 pr-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" /></div>
             </div>
 
             <div class="space-y-2">
@@ -116,7 +120,7 @@
                 <input v-model="form.zrp" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
                 <span class="text-sm text-gray-700 dark:text-gray-400">ZRP</span>
               </label>
-              <input v-if="form.zrp" v-model.number="form.zrp_value" type="number" min="0" step="0.01" placeholder="ZRP value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                <div v-if="form.zrp" class="relative"><span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">$</span><input v-model.number="form.zrp_value" type="number" min="0" step="0.01" placeholder="ZRP value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-8 pr-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" /></div>
             </div>
 
             <div class="space-y-2">
@@ -124,7 +128,7 @@
                 <input v-model="form.insurance" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
                 <span class="text-sm text-gray-700 dark:text-gray-400">Insurance</span>
               </label>
-              <input v-if="form.insurance" v-model.number="form.insurance_value" type="number" min="0" step="0.01" placeholder="Insurance value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                <div v-if="form.insurance" class="relative"><span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">$</span><input v-model.number="form.insurance_value" type="number" min="0" step="0.01" placeholder="Insurance value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-8 pr-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" /></div>
             </div>
 
             <div class="space-y-2">
@@ -132,7 +136,7 @@
                 <input v-model="form.zinara" type="checkbox" class="rounded border-gray-300 bg-white text-brand-500 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900" />
                 <span class="text-sm text-gray-700 dark:text-gray-400">Zinara</span>
               </label>
-              <input v-if="form.zinara" v-model.number="form.zinara_value" type="number" min="0" step="0.01" placeholder="Zinara value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                <div v-if="form.zinara" class="relative"><span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">$</span><input v-model.number="form.zinara_value" type="number" min="0" step="0.01" placeholder="Zinara value" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-8 pr-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" /></div>
             </div>
           </div>
         </fieldset>
@@ -188,12 +192,12 @@ const form = reactive({
   insurance: false,
   zinara: false,
   vid_value: null as number | null,
-  cof_value: null as number | null,
   cvr_value: null as number | null,
   zbc_value: null as number | null,
   zrp_value: null as number | null,
   insurance_value: null as number | null,
   zinara_value: null as number | null,
+  petty_cash_voucher_number: '',
 })
 
 const fetchMakes = async () => {
@@ -207,6 +211,7 @@ const fetchMakes = async () => {
 const fetchModels = async (makeId: string) => {
   models.value = []
   form.model = ''
+  form.make = makes.value.find((make) => String(make.id) === makeId)?.make_name || ''
   if (!makeId) return
 
   isLoadingModels.value = true
@@ -250,12 +255,12 @@ const saveVehicle = async () => {
     insurance: form.insurance,
     zinara: form.zinara,
     vid_value: form.vid ? form.vid_value : null,
-    cof_value: form.cof ? form.cof_value : null,
     cvr_value: form.cvr ? form.cvr_value : null,
     zbc_value: form.zbc ? form.zbc_value : null,
     zrp_value: form.zrp ? form.zrp_value : null,
     insurance_value: form.insurance ? form.insurance_value : null,
     zinara_value: form.zinara ? form.zinara_value : null,
+    petty_cash_voucher_number: form.petty_cash_voucher_number || null,
   }
 
   try {

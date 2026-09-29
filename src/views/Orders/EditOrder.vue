@@ -214,9 +214,9 @@ const salespersonName = computed(() => {
 
 const formatCurrency = (value: number | string | null | undefined) => {
   if (!value && value !== 0) return '—'
-  return new Intl.NumberFormat('en-ZA', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'ZAR',
+    currency: 'USD',
     maximumFractionDigits: 2,
   }).format(Number(value))
 }
