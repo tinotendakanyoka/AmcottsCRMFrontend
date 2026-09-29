@@ -89,10 +89,12 @@
             <p v-if="orderFiles.length === 0" class="text-sm text-gray-500 dark:text-gray-400">No files uploaded yet.</p>
             <ul v-else class="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white dark:divide-gray-700 dark:border-gray-700 dark:bg-gray-900/40">
               <li v-for="file in orderFiles" :key="file.id || file.url || file.file_url || getFileName(file)" class="flex items-center justify-between gap-4 px-3 py-2.5 text-sm">
-                <span class="truncate text-gray-700 dark:text-gray-300">{{ getFileName(file) }}</span>
-                <a v-if="getFileUrl(file)" :href="getFileUrl(file)" target="_blank" rel="noopener noreferrer" class="shrink-0 font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300">
-                  View file
-                </a>
+                <button type="button" :disabled="downloadingFileId === file.id" @click="downloadFile(file)" class="min-w-0 truncate text-left font-medium text-brand-600 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60 dark:text-brand-400 dark:hover:text-brand-300">
+                  {{ getFileName(file) }}
+                </button>
+                <span class="shrink-0 text-xs text-gray-500 dark:text-gray-400">
+                  {{ downloadingFileId === file.id ? 'Downloading...' : 'Download' }}
+                </span>
               </li>
             </ul>
           </div>
@@ -110,6 +112,7 @@
           <p v-if="uploadMessage" class="text-sm" :class="uploadError ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
             {{ uploadMessage }}
           </p>
+          <p v-if="downloadError" class="text-sm text-red-600 dark:text-red-400">{{ downloadError }}</p>
         </section>
 
         <div class="flex items-center justify-end gap-3 pt-2">
@@ -180,6 +183,8 @@ const selectedFile = ref<File | null>(null)
 const uploadingFile = ref(false)
 const uploadMessage = ref('')
 const uploadError = ref(false)
+const downloadingFileId = ref<number | string | null>(null)
+const downloadError = ref('')
 
 const form = reactive({
   status: '',
@@ -219,10 +224,28 @@ const formatCurrency = (value: number | string | null | undefined) => {
 const getFileName = (file: OrderFile) =>
   file.name || file.filename || file.original_name || file.file_name || `Document ${file.id || ''}`.trim()
 
-const getFileUrl = (file: OrderFile) => {
-  const fileUrl = file.url || file.file_url || file.download_url || file.path
-  if (!fileUrl) return ''
-  return new URL(fileUrl, API_BASE).toString()
+const downloadFile = async (file: OrderFile) => {
+  if (!file.id) return
+
+  downloadingFileId.value = file.id
+  downloadError.value = ''
+  try {
+    const response = await fetch(`${API_BASE}/files/orders/${orderId.value}/${file.id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    })
+    if (!response.ok) throw new Error('Failed to download file')
+
+    const blobUrl = URL.createObjectURL(await response.blob())
+    const link = document.createElement('a')
+    link.href = blobUrl
+    link.download = getFileName(file)
+    link.click()
+    URL.revokeObjectURL(blobUrl)
+  } catch (error) {
+    downloadError.value = error instanceof Error ? error.message : 'Failed to download file'
+  } finally {
+    downloadingFileId.value = null
+  }
 }
 
 const handleFileChange = (event: Event) => {
