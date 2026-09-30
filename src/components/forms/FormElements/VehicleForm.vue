@@ -1,6 +1,17 @@
 <template>
   <fieldset :disabled="isSubmitted" class="space-y-5 p-2">
     <div class="grid gap-5 md:grid-cols-2">
+      <div class="md:col-span-2">
+        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Vehicle record</label>
+        <select v-model="selectedVehicleId" :disabled="isSubmitted || isLoadingVehicles" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+          <option value="">Create a new vehicle</option>
+          <option v-for="vehicle in vehicles" :key="vehicle.id" :value="String(vehicle.id)">
+            #{{ vehicle.id }} - {{ vehicle.make || 'Unknown make' }} {{ vehicle.model || '' }}
+          </option>
+        </select>
+        <p v-if="isLoadingVehicles" class="mt-1 text-xs text-gray-500 dark:text-gray-400">Loading existing vehicles...</p>
+      </div>
+
       <div>
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Make</label>
         <select v-model="selectedMakeId" :disabled="isSubmitted" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
@@ -165,6 +176,8 @@ type VehicleMake = { id: number; make_name: string }
 type VehicleModel = { id: number; model_name: string; make_id: number }
 type VehicleRecord = {
   id?: number | string
+  make?: string
+  model?: string
   [key: string]: unknown
 }
 
@@ -173,8 +186,11 @@ const emit = defineEmits<{ saved: [vehicle: VehicleRecord] }>()
 
 const makes = ref<VehicleMake[]>([])
 const models = ref<VehicleModel[]>([])
+const vehicles = ref<VehicleRecord[]>([])
+const selectedVehicleId = ref('')
 const selectedMakeId = ref('')
 const isLoadingModels = ref(false)
+const isLoadingVehicles = ref(false)
 const isSaving = ref(false)
 const isSubmitted = ref(false)
 const errorMessage = ref('')
@@ -218,6 +234,19 @@ const fetchMakes = async () => {
   makes.value = await response.json()
 }
 
+const fetchVehicles = async () => {
+  isLoadingVehicles.value = true
+  try {
+    const response = await fetch(`${API_BASE}/vehicles/`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    })
+    if (!response.ok) throw new Error(await getResponseErrorMessage(response, 'Unable to load existing vehicles.'))
+    vehicles.value = await response.json()
+  } finally {
+    isLoadingVehicles.value = false
+  }
+}
+
 const fetchModels = async (makeId: string) => {
   models.value = []
   form.model = ''
@@ -238,6 +267,58 @@ const fetchModels = async (makeId: string) => {
 
 watch(selectedMakeId, (makeId) => {
   if (!isInitializing.value) fetchModels(makeId)
+})
+
+const selectVehicle = async (vehicleId: string) => {
+  if (isInitializing.value) return
+
+  const vehicle = vehicles.value.find((item) => String(item.id) === vehicleId)
+  if (!vehicle) {
+    selectedMakeId.value = ''
+    Object.assign(form, {
+      make: '',
+      model: '',
+      engine: '',
+      transmission: '',
+      chassis_number: '',
+      color: '',
+      tyre_size_and_make: '',
+      modifications_special_instructions: '',
+      extra_options: '',
+      vid_or_cof: false,
+      sign_writing: false,
+      reflective_tape: false,
+      multi_functional_steering: false,
+      vid: false,
+      cof: false,
+      cvr: false,
+      zbc: false,
+      zrp: false,
+      insurance: false,
+      zinara: false,
+      vid_value: null,
+      cvr_value: null,
+      zbc_value: null,
+      zrp_value: null,
+      insurance_value: null,
+      zinara_value: null,
+      petty_cash_voucher_number: '',
+    })
+    return
+  }
+
+  isInitializing.value = true
+  Object.assign(form, vehicle)
+  selectedMakeId.value = String(
+    makes.value.find((make) => make.make_name === vehicle.make)?.id || '',
+  )
+  await fetchModels(selectedMakeId.value)
+  form.model = String(vehicle.model || '')
+  isInitializing.value = false
+}
+
+watch(selectedVehicleId, (vehicleId) => {
+  if (!isInitializing.value) selectVehicle(vehicleId)
 })
 
 const saveVehicle = async () => {
@@ -305,9 +386,10 @@ const saveVehicle = async () => {
   }
 
   try {
-    const isEditing = Boolean(props.vehicle?.id)
+    const isEditing = Boolean(selectedVehicleId.value || props.vehicle?.id)
+    const vehicleId = selectedVehicleId.value || props.vehicle?.id
     const response = await fetch(
-      isEditing ? `${API_BASE}/vehicles/${props.vehicle?.id}` : `${API_BASE}/vehicles/create`,
+      isEditing ? `${API_BASE}/vehicles/${vehicleId}` : `${API_BASE}/vehicles/create`,
       {
       method: isEditing ? 'PUT' : 'POST',
       headers: {
@@ -323,7 +405,11 @@ const saveVehicle = async () => {
       throw new Error(getApiErrorMessage(errorBody, 'Unable to save vehicle.'))
     }
 
-    const savedVehicle = await response.json()
+    const responseVehicle = await response.json()
+    const savedVehicle = {
+      ...responseVehicle,
+      ...(isEditing ? { id: vehicleId } : {}),
+    }
     appDataStore.setSelectedVehicle(savedVehicle)
     emit('saved', savedVehicle)
     isSubmitted.value = true
@@ -337,9 +423,10 @@ const saveVehicle = async () => {
 
 onMounted(async () => {
   try {
-    await fetchMakes()
+    await Promise.all([fetchMakes(), fetchVehicles()])
     if (props.vehicle) {
       isInitializing.value = true
+      selectedVehicleId.value = String(props.vehicle.id || '')
       Object.assign(form, props.vehicle)
       selectedMakeId.value = String(
         makes.value.find((make) => make.make_name === props.vehicle?.make)?.id || '',
