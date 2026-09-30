@@ -11,10 +11,11 @@
 
       <div>
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Model</label>
-        <select v-model="form.model" :disabled="isSubmitted || !selectedMakeId || isLoadingModels" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-          <option value="">{{ isLoadingModels ? 'Loading models...' : 'Select a model' }}</option>
+        <select v-if="models.length > 0" v-model="form.model" :disabled="isSubmitted || !selectedMakeId || isLoadingModels" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+          <option value="">Select a model</option>
           <option v-for="model in models" :key="model.id" :value="model.model_name">{{ model.model_name }}</option>
         </select>
+        <input v-else v-model="form.model" :disabled="isSubmitted || !selectedMakeId || isLoadingModels" :placeholder="isLoadingModels ? 'Loading models...' : 'Enter model'" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
       </div>
 
       <div>
