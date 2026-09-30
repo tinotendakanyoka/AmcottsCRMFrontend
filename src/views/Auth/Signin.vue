@@ -150,6 +150,7 @@ import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import { useRouter } from 'vue-router'
 import { API_BASE } from '@/config'
+import { getApiErrorMessage } from '@/utils/validation'
 const username = ref('')
 const password = ref('')
 const showPassword = ref(false)
@@ -163,9 +164,11 @@ const togglePasswordVisibility = () => {
 }
 
 const handleSubmit = async () => {
-
-
   if (isSubmitting.value){return}
+  if (!username.value.trim() || !password.value) {
+    loginError.value = 'Enter your username and password.'
+    return
+  }
   isSubmitting.value = true
   loginError.value = ''
   const payload = {
@@ -231,7 +234,7 @@ const handleSubmit = async () => {
 
     await router.push('/')
   } else {
-    loginError.value = data.detail || 'Login failed. Please try again.'
+    loginError.value = getApiErrorMessage(data, 'Login failed. Please try again.')
   }
   isSubmitting.value = false
 }  catch (error) {

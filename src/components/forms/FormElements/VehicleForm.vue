@@ -156,11 +156,19 @@
 import { onMounted, reactive, ref, watch } from 'vue'
 import { API_BASE } from '@/config'
 import { useAppDataStore } from '@/stores/appData'
+import { getApiErrorMessage, getResponseErrorMessage, isNonNegativeNumber } from '@/utils/validation'
 
 const appDataStore = useAppDataStore()
 
 type VehicleMake = { id: number; make_name: string }
 type VehicleModel = { id: number; model_name: string; make_id: number }
+type VehicleRecord = {
+  id?: number | string
+  [key: string]: unknown
+}
+
+const props = defineProps<{ vehicle?: VehicleRecord | null }>()
+const emit = defineEmits<{ saved: [vehicle: VehicleRecord] }>()
 
 const makes = ref<VehicleMake[]>([])
 const models = ref<VehicleModel[]>([])
@@ -169,6 +177,7 @@ const isLoadingModels = ref(false)
 const isSaving = ref(false)
 const isSubmitted = ref(false)
 const errorMessage = ref('')
+const isInitializing = ref(false)
 
 const form = reactive({
   make: '',
@@ -204,7 +213,7 @@ const fetchMakes = async () => {
   const response = await fetch(`${API_BASE}/vehicles/makes`, {
     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
   })
-  if (!response.ok) throw new Error('Failed to load vehicle makes')
+  if (!response.ok) throw new Error(await getResponseErrorMessage(response, 'Unable to load vehicle makes.'))
   makes.value = await response.json()
 }
 
@@ -219,18 +228,49 @@ const fetchModels = async (makeId: string) => {
     const response = await fetch(`${API_BASE}/vehicles/make/${makeId}/models`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-    if (!response.ok) throw new Error('Failed to load vehicle models')
+    if (!response.ok) throw new Error(await getResponseErrorMessage(response, 'Unable to load vehicle models.'))
     models.value = await response.json()
   } finally {
     isLoadingModels.value = false
   }
 }
 
-watch(selectedMakeId, fetchModels)
+watch(selectedMakeId, (makeId) => {
+  if (!isInitializing.value) fetchModels(makeId)
+})
 
 const saveVehicle = async () => {
   if (isSubmitted.value || isSaving.value) return
   errorMessage.value = ''
+
+  const requiredFields: Array<[string, string]> = [
+    ['Make', form.make],
+    ['Model', form.model],
+    ['Engine number', form.engine],
+    ['Transmission', form.transmission],
+    ['VIN / Chassis number', form.chassis_number],
+    ['Colour', form.color],
+  ]
+  const missingField = requiredFields.find(([, value]) => !value.trim())
+  if (missingField) {
+    errorMessage.value = `${missingField[0]} is required.`
+    return
+  }
+
+  const feeFields: Array<[string, boolean, number | null]> = [
+    ['VID', form.vid, form.vid_value],
+    ['CVR', form.cvr, form.cvr_value],
+    ['ZBC', form.zbc, form.zbc_value],
+    ['ZRP', form.zrp, form.zrp_value],
+    ['Insurance', form.insurance, form.insurance_value],
+    ['Zinara', form.zinara, form.zinara_value],
+  ]
+  const invalidFee = feeFields.find(([, enabled, value]) => enabled && !isNonNegativeNumber(value))
+  if (invalidFee) {
+    errorMessage.value = `${invalidFee[0]} value must be zero or greater.`
+    return
+  }
+
   isSaving.value = true
   const token = localStorage.getItem('token')
   const payload = {
@@ -264,21 +304,27 @@ const saveVehicle = async () => {
   }
 
   try {
-    const response = await fetch(`${API_BASE}/vehicles/create`, {
-      method: 'POST',
+    const isEditing = Boolean(props.vehicle?.id)
+    const response = await fetch(
+      isEditing ? `${API_BASE}/vehicles/${props.vehicle?.id}` : `${API_BASE}/vehicles/create`,
+      {
+      method: isEditing ? 'PUT' : 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
-    })
+      },
+    )
 
     if (!response.ok) {
-      throw new Error(await response.text())
+      const errorBody = await response.json().catch(() => null)
+      throw new Error(getApiErrorMessage(errorBody, 'Unable to save vehicle.'))
     }
 
     const savedVehicle = await response.json()
     appDataStore.setSelectedVehicle(savedVehicle)
+    emit('saved', savedVehicle)
     isSubmitted.value = true
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to save vehicle'
@@ -291,6 +337,16 @@ const saveVehicle = async () => {
 onMounted(async () => {
   try {
     await fetchMakes()
+    if (props.vehicle) {
+      isInitializing.value = true
+      Object.assign(form, props.vehicle)
+      selectedMakeId.value = String(
+        makes.value.find((make) => make.make_name === props.vehicle?.make)?.id || '',
+      )
+      await fetchModels(selectedMakeId.value)
+      form.model = String(props.vehicle.model || '')
+      isInitializing.value = false
+    }
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to load vehicle makes'
   }

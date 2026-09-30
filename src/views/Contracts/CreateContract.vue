@@ -55,6 +55,7 @@ import { API_BASE } from '@/config'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
+import { getApiErrorMessage, getResponseErrorMessage, isNonNegativeNumber, isValidDate } from '@/utils/validation'
 
 type OrderOption = { id?: number | string; status?: string | null }
 type OrderDetails = {
@@ -92,7 +93,7 @@ const fillFromSelectedOrder = async () => {
     const response = await fetch(`${API_BASE}/orders/${form.order_id}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-    if (!response.ok) throw new Error('Failed to load selected order')
+    if (!response.ok) throw new Error(await getResponseErrorMessage(response, 'Unable to load the selected order.'))
     const order = await response.json() as OrderDetails
     const customer = order.customer_detail || {}
     const vehicle = order.vehicle_detail || {}
@@ -115,6 +116,35 @@ const fillFromSelectedOrder = async () => {
 }
 
 const submitContract = async () => {
+  if (!form.order_id) {
+    errorMessage.value = 'Select an order before generating the contract.'
+    return
+  }
+  const amountFields: Array<[string, number | null]> = [
+    ['Purchase price before VAT', form.purchase_price_before_vat],
+    ['Total purchase price', form.total_purchase_price],
+    ['Initial deposit', form.initial_deposit],
+    ['Balance due', form.balance_due],
+  ]
+  const invalidAmount = amountFields.find(([, value]) => value !== null && !isNonNegativeNumber(value))
+  if (invalidAmount) {
+    errorMessage.value = `${invalidAmount[0]} must be zero or greater.`
+    return
+  }
+  if (form.vat_amount_percentage !== null && (form.vat_amount_percentage < 0 || form.vat_amount_percentage > 100)) {
+    errorMessage.value = 'VAT percentage must be between 0 and 100.'
+    return
+  }
+  const dateFields: Array<[string, string]> = [
+    ['Initial deposit date', form.initial_deposit_date],
+    ['Contract date', form.contract_date],
+  ]
+  const invalidDate = dateFields.find(([, value]) => value && !isValidDate(value))
+  if (invalidDate) {
+    errorMessage.value = `${invalidDate[0]} is invalid.`
+    return
+  }
+
   isSaving.value = true
   errorMessage.value = ''
   try {
@@ -129,7 +159,10 @@ const submitContract = async () => {
     const response = await fetch(`${API_BASE}/contracts/create`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` }, body: JSON.stringify(payload),
     })
-    if (!response.ok) throw new Error(await response.text())
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => null)
+      throw new Error(getApiErrorMessage(errorBody, 'Failed to generate contract.'))
+    }
     const createdContract = await response.json()
     const existingContracts = JSON.parse(localStorage.getItem('contracts') || '[]')
     localStorage.setItem('contracts', JSON.stringify([createdContract, ...existingContracts]))
@@ -144,7 +177,7 @@ const submitContract = async () => {
 onMounted(async () => {
   try {
     const response = await fetch(`${API_BASE}/orders/`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
-    if (!response.ok) throw new Error('Failed to load orders')
+    if (!response.ok) throw new Error(await getResponseErrorMessage(response, 'Unable to load orders.'))
     orders.value = await response.json()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to load orders'

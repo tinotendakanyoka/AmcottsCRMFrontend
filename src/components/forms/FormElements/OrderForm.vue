@@ -66,6 +66,7 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { API_BASE } from '@/config'
 import { useAppDataStore } from '@/stores/appData'
+import { getApiErrorMessage, isNonNegativeNumber, isValidDate } from '@/utils/validation'
 
 type OptionRecord = {
   id?: number | string
@@ -137,6 +138,19 @@ const saveOrder = async () => {
   if (isSaving.value) return
 
   errorMessage.value = ''
+  if (!form.customer_id || !form.salesperson_id || !form.vehicle_id) {
+    errorMessage.value = 'Select a customer, salesperson, and vehicle.'
+    return
+  }
+  if (form.deposit_amount && !isNonNegativeNumber(form.deposit_amount)) {
+    errorMessage.value = 'Deposit amount must be zero or greater.'
+    return
+  }
+  if (form.expected_delivery_date && !isValidDate(form.expected_delivery_date)) {
+    errorMessage.value = 'Enter a valid expected delivery date.'
+    return
+  }
+
   isSaving.value = true
   const token = localStorage.getItem('token')
   const payload = {
@@ -161,7 +175,7 @@ const saveOrder = async () => {
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => null)
-      throw new Error(formatApiError(errorBody, response.status))
+      throw new Error(getApiErrorMessage(errorBody, 'Unable to create the order.', response.status))
     }
 
     localStorage.setItem('orderSuccessMessage', 'Order created successfully.')
@@ -171,21 +185,6 @@ const saveOrder = async () => {
   } finally {
     isSaving.value = false
   }
-}
-
-const formatApiError = (body: unknown, status: number) => {
-  if (body && typeof body === 'object' && 'detail' in body) {
-    const detail = body.detail
-    if (Array.isArray(detail)) {
-      return detail.map((item) => {
-        if (item && typeof item === 'object' && 'msg' in item) return String(item.msg)
-        return String(item)
-      }).join(' ')
-    }
-    if (detail) return String(detail)
-  }
-
-  return `Unable to create the order (request failed with status ${status}).`
 }
 
 onMounted(async () => {

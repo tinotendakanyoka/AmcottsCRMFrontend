@@ -106,6 +106,7 @@ import { API_BASE } from '@/config'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
+import { getResponseErrorMessage, isValidEmail } from '@/utils/validation'
 
 type OrderRecord = {
   id?: number | string
@@ -229,6 +230,14 @@ const notifyOrder = async () => {
     notifyError.value = 'Add at least one email address or select a user.'
     return
   }
+  if (emails.some((email) => !isValidEmail(email))) {
+    notifyError.value = 'Enter only valid email addresses.'
+    return
+  }
+  if (!notifyForm.value.message.trim()) {
+    notifyError.value = 'Add a message before sending the notification.'
+    return
+  }
 
   isNotifying.value = true
   notifyError.value = ''
@@ -246,7 +255,7 @@ const notifyOrder = async () => {
         user_ids: notifyForm.value.userIds.length ? notifyForm.value.userIds : null,
       }),
     })
-    if (!response.ok) throw new Error(await response.text())
+    if (!response.ok) throw new Error(await getResponseErrorMessage(response, 'Unable to send the notification.'))
     successMessage.value = 'Order notification sent.'
     closeNotifyModal()
   } catch (error) {

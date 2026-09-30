@@ -110,6 +110,7 @@
       <button @click="saveCustomer" class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-600 focus:outline-none focus:ring-4 focus:ring-brand-300 dark:focus:ring-brand-900">
         Save Customer
       </button>
+      <p v-if="errorMessage" class="basis-full text-sm text-error-600">{{ errorMessage }}</p>
     </div>
 </template>
 
@@ -119,6 +120,7 @@ import 'flatpickr/dist/flatpickr.css'
 import { API_BASE } from '@/config'
 import { storeToRefs } from 'pinia'
 import { useAppDataStore } from '@/stores/appData'
+import { getApiErrorMessage, isValidEmail } from '@/utils/validation'
 
 type CustomerRecord = {
   id?: number
@@ -157,6 +159,7 @@ const newCustomer = ref(true)
 const selectedCustomerId = ref('')
 const selectedCustomerData = ref<CustomerRecord | null>(null)
 const isCustomerRole = ref(false)
+const errorMessage = ref('')
 
 watch(
   () => selectedCustomer.value,
@@ -293,9 +296,27 @@ const initializeCustomerContext = async () => {
 }
 
 const saveCustomer = async () => {
+  errorMessage.value = ''
   try {
     const token = localStorage.getItem('token')
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
+
+    if (!formData.name.trim() && !formData.companyDetails.trim()) {
+      errorMessage.value = 'Enter a customer name or company name.'
+      return
+    }
+    if (formData.email.trim() && !isValidEmail(formData.email)) {
+      errorMessage.value = 'Enter a valid customer email address.'
+      return
+    }
+    if (formData.preferredContactEmail.trim() && !isValidEmail(formData.preferredContactEmail)) {
+      errorMessage.value = 'Enter a valid preferred contact email address.'
+      return
+    }
+    if (!Number(currentUser.id)) {
+      errorMessage.value = 'A signed-in user is required to create a customer.'
+      return
+    }
 
     const payload = {
       user_id: Number(currentUser.id ?? 0),
@@ -323,10 +344,10 @@ const saveCustomer = async () => {
       await getCustomerData()
       selectedCustomerId.value = String(data.id ?? '')
     } else {
-      console.error('Error saving customer:', data)
+      errorMessage.value = getApiErrorMessage(data, 'Unable to save customer.')
     }
   } catch (error) {
-    console.error('Error saving customer:', error)
+    errorMessage.value = error instanceof Error ? error.message : 'Unable to save customer.'
   }
 }
 

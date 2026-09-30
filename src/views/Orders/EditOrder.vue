@@ -2,48 +2,61 @@
   <AdminLayout>
     <PageBreadcrumb :pageTitle="currentPageTitle" />
 
-    <ComponentCard title="Edit Order" desc="Update order status and approval information.">
+    <ComponentCard title="Edit Order" desc="Update all order information.">
       <form class="space-y-5" @submit.prevent="saveOrder">
-        <!-- Read-only order info section -->
-        <div class="space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/30">
-          <div class="grid gap-4 md:grid-cols-2">
-            <div>
-              <p class="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">Customer</p>
-              <p class="mt-2 text-sm text-gray-800 dark:text-white/90">{{ customerName || '—' }}</p>
-            </div>
-
-            <div>
-              <p class="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">Vehicle</p>
-              <p class="mt-2 text-sm text-gray-800 dark:text-white/90">{{ vehicleName || '—' }}</p>
-            </div>
-
-            <div>
-              <p class="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">Salesperson</p>
-              <p class="mt-2 text-sm text-gray-800 dark:text-white/90">{{ salespersonName || '—' }}</p>
-            </div>
-
-            <div>
-              <p class="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">Deposit Amount</p>
-              <p class="mt-2 text-sm text-gray-800 dark:text-white/90">{{ formatCurrency(orderData?.deposit_amount) }}</p>
-            </div>
-
-            <div>
-              <p class="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">Expected Delivery</p>
-              <p class="mt-2 text-sm text-gray-800 dark:text-white/90">{{ orderData?.expected_delivery_date || '—' }}</p>
-            </div>
-
-            <div>
-              <p class="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">Port to Ship</p>
-              <p class="mt-2 text-sm text-gray-800 dark:text-white/90">{{ orderData?.port_to_be_shipped || '—' }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Editable fields: status and approval -->
         <div class="grid gap-5 md:grid-cols-2">
           <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Customer</label>
+            <select v-model="form.customer_id" required :class="inputClasses">
+              <option value="">Select customer</option>
+              <option v-for="customer in customers" :key="customer.id" :value="String(customer.id)">{{ customer.company_name || customer.customer_name || customer.name || 'Customer' }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Vehicle</label>
+            <select v-model="form.vehicle_id" required :class="inputClasses">
+              <option value="">Select vehicle</option>
+              <option v-for="vehicle in vehicles" :key="vehicle.id" :value="String(vehicle.id)">{{ vehicle.make }} {{ vehicle.model }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Salesperson</label>
+            <select v-model="form.salesperson_id" required :class="inputClasses">
+              <option value="">Select salesperson</option>
+              <option v-for="person in salespeople" :key="person.id" :value="String(person.id)">{{ person.salesperson_name || person.username || person.email || 'Salesperson' }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Deposit amount</label>
+            <input v-model="form.deposit_amount" type="number" step="0.01" :class="inputClasses" />
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Order date</label>
+            <input v-model="form.order_date" type="date" :class="inputClasses" />
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Expected delivery date</label>
+            <input v-model="form.expected_delivery_date" type="date" :class="inputClasses" />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Port to be shipped to</label>
+            <input v-model="form.port_to_be_shipped" :class="inputClasses" />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Deposit receipt reference number</label>
+            <input v-model="form.deposit_receipt_referrence_number" :class="inputClasses" />
+          </div>
+
+          <div>
             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Order status</label>
-            <select v-model="form.status" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+            <select v-model="form.status" :class="inputClasses">
               <option value="Draft">Draft</option>
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
@@ -75,6 +88,21 @@
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Signed by Customer</span>
               </label>
             </div>
+          </div>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-3">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Accounts approval date</label>
+            <input v-model="form.accounts_approval_date" type="date" :class="inputClasses" />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Seller sign date</label>
+            <input v-model="form.seller_sign_date" type="date" :class="inputClasses" />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Customer sign date</label>
+            <input v-model="form.customer_sign_date" type="date" :class="inputClasses" />
           </div>
         </div>
 
@@ -115,12 +143,13 @@
           <p v-if="downloadError" class="text-sm text-red-600 dark:text-red-400">{{ downloadError }}</p>
         </section>
 
+        <p v-if="errorMessage" class="text-sm text-error-600">{{ errorMessage }}</p>
         <div class="flex items-center justify-end gap-3 pt-2">
           <router-link to="/orders" class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
             Cancel
           </router-link>
-          <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-600 focus:outline-none focus:ring-4 focus:ring-brand-300 dark:focus:ring-brand-900">
-            Save Changes
+          <button type="submit" :disabled="isSaving" class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-600 focus:outline-none focus:ring-4 focus:ring-brand-300 disabled:cursor-not-allowed disabled:opacity-60 dark:focus:ring-brand-900">
+            {{ isSaving ? 'Saving...' : 'Save Changes' }}
           </button>
         </div>
       </form>
@@ -135,15 +164,25 @@ import { API_BASE } from '@/config'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
+import { getApiErrorMessage, getResponseErrorMessage, isNonNegativeNumber, isValidDate } from '@/utils/validation'
 
 type OrderData = {
+  id?: number | string
+  customer_id?: number | string | null
+  vehicle_id?: number | string | null
+  salesperson_id?: number | string | null
   deposit_amount?: number | string | null
+  deposit_receipt_referrence_number?: string | null
+  order_date?: string | null
   expected_delivery_date?: string | null
   port_to_be_shipped?: string | null
   status?: string | null
   signed_by_seller?: boolean
   signed_by_customer?: boolean
   accounts_approved?: boolean
+  accounts_approval_date?: string | null
+  seller_sign_date?: string | null
+  customer_sign_date?: string | null
   customer_detail?: {
     customer_name?: string
     company_name?: string
@@ -157,6 +196,18 @@ type OrderData = {
     salesperson_name?: string
     username?: string
   }
+}
+
+type OptionRecord = {
+  id?: number | string
+  company_name?: string
+  customer_name?: string
+  name?: string
+  make?: string
+  model?: string
+  salesperson_name?: string
+  username?: string
+  email?: string
 }
 
 type OrderFile = {
@@ -176,8 +227,10 @@ const router = useRouter()
 const currentPageTitle = ref('Edit Order')
 const orderId = computed(() => Number(route.params.id))
 
-// Store full order details for display
 const orderData = ref<OrderData | null>(null)
+const customers = ref<OptionRecord[]>([])
+const vehicles = ref<OptionRecord[]>([])
+const salespeople = ref<OptionRecord[]>([])
 const orderFiles = ref<OrderFile[]>([])
 const selectedFile = ref<File | null>(null)
 const uploadingFile = ref(false)
@@ -185,41 +238,30 @@ const uploadMessage = ref('')
 const uploadError = ref(false)
 const downloadingFileId = ref<number | string | null>(null)
 const downloadError = ref('')
+const errorMessage = ref('')
+const isSaving = ref(false)
 
 const form = reactive({
+  customer_id: '',
+  vehicle_id: '',
+  salesperson_id: '',
+  deposit_amount: '',
+  deposit_receipt_referrence_number: '',
+  order_date: '',
+  expected_delivery_date: '',
+  port_to_be_shipped: '',
   status: '',
   signed_by_seller: false,
   signed_by_customer: false,
   accounts_approved: false,
+  accounts_approval_date: '',
+  seller_sign_date: '',
+  customer_sign_date: '',
 })
 
-// Computed properties for read-only display
-const customerName = computed(() => {
-  if (!orderData.value) return ''
-  const customer = orderData.value.customer_detail || {}
-  return customer.customer_name || customer.company_name || customer.name || ''
-})
+const dateInputValue = (value: string | null | undefined) => value ? value.slice(0, 10) : ''
 
-const vehicleName = computed(() => {
-  if (!orderData.value) return ''
-  const vehicle = orderData.value.vehicle_detail || {}
-  return `${vehicle.make || ''} ${vehicle.model || ''}`.trim()
-})
-
-const salespersonName = computed(() => {
-  if (!orderData.value) return ''
-  const salesperson = orderData.value.salesperson_detail || {}
-  return salesperson.salesperson_name || salesperson.username || ''
-})
-
-const formatCurrency = (value: number | string | null | undefined) => {
-  if (!value && value !== 0) return '—'
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 2,
-  }).format(Number(value))
-}
+const inputClasses = 'dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800'
 
 const getFileName = (file: OrderFile) =>
   file.name || file.filename || file.original_name || file.file_name || `Document ${file.id || ''}`.trim()
@@ -233,7 +275,7 @@ const downloadFile = async (file: OrderFile) => {
     const response = await fetch(`${API_BASE}/files/orders/${orderId.value}/${file.id}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-    if (!response.ok) throw new Error('Failed to download file')
+    if (!response.ok) throw new Error(await getResponseErrorMessage(response, 'Unable to download the file.'))
 
     const blobUrl = URL.createObjectURL(await response.blob())
     const link = document.createElement('a')
@@ -276,7 +318,7 @@ const uploadFile = async () => {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to upload file')
+      throw new Error(await getResponseErrorMessage(response, 'Unable to upload the file.'))
     }
 
     selectedFile.value = null
@@ -302,11 +344,29 @@ const fetchOrderFiles = async () => {
   })
 
   if (!response.ok) {
-    throw new Error('Failed to load order files')
+    throw new Error(await getResponseErrorMessage(response, 'Unable to load order files.'))
   }
 
   const data = await response.json() as OrderFile[] | { files?: OrderFile[]; documents?: OrderFile[] }
   orderFiles.value = Array.isArray(data) ? data : data.files || data.documents || []
+}
+
+const fetchOptions = async () => {
+  const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  const [customersResponse, vehiclesResponse] = await Promise.all([
+    fetch(`${API_BASE}/customers/`, { headers }),
+    fetch(`${API_BASE}/vehicles/`, { headers }),
+  ])
+
+  if (customersResponse.ok) customers.value = await customersResponse.json()
+  if (vehiclesResponse.ok) vehicles.value = await vehiclesResponse.json()
+
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
+  salespeople.value = [{
+    id: currentUser.id,
+    username: currentUser.username,
+    email: currentUser.email,
+  }]
 }
 
 const fetchOrder = async () => {
@@ -320,51 +380,100 @@ const fetchOrder = async () => {
   })
 
   if (!response.ok) {
-    throw new Error('Failed to load order')
+    throw new Error(await getResponseErrorMessage(response, 'Unable to load the order.'))
   }
 
   const data = await response.json()
   orderData.value = data
-  
-  // Load editable fields from the order
+
+  form.customer_id = String(data.customer_id || '')
+  form.vehicle_id = String(data.vehicle_id || '')
+  form.salesperson_id = String(data.salesperson_id || '')
+  form.deposit_amount = data.deposit_amount === null || data.deposit_amount === undefined ? '' : String(data.deposit_amount)
+  form.deposit_receipt_referrence_number = data.deposit_receipt_referrence_number || ''
+  form.order_date = dateInputValue(data.order_date)
+  form.expected_delivery_date = dateInputValue(data.expected_delivery_date)
+  form.port_to_be_shipped = data.port_to_be_shipped || ''
   form.status = data.status || ''
   form.signed_by_seller = data.signed_by_seller || false
   form.signed_by_customer = data.signed_by_customer || false
   form.accounts_approved = data.accounts_approved || false
+  form.accounts_approval_date = dateInputValue(data.accounts_approval_date)
+  form.seller_sign_date = dateInputValue(data.seller_sign_date)
+  form.customer_sign_date = dateInputValue(data.customer_sign_date)
 }
 
 const saveOrder = async () => {
+  if (isSaving.value) return
+  errorMessage.value = ''
+  if (!form.customer_id || !form.vehicle_id || !form.salesperson_id) {
+    errorMessage.value = 'Select a customer, vehicle, and salesperson.'
+    return
+  }
+  if (form.deposit_amount && !isNonNegativeNumber(form.deposit_amount)) {
+    errorMessage.value = 'Deposit amount must be zero or greater.'
+    return
+  }
+  const dateFields: Array<[string, string]> = [
+    ['Order date', form.order_date],
+    ['Expected delivery date', form.expected_delivery_date],
+    ['Accounts approval date', form.accounts_approval_date],
+    ['Seller sign date', form.seller_sign_date],
+    ['Customer sign date', form.customer_sign_date],
+  ]
+  const invalidDate = dateFields.find(([, value]) => value && !isValidDate(value))
+  if (invalidDate) {
+    errorMessage.value = `${invalidDate[0]} is invalid.`
+    return
+  }
+
+  isSaving.value = true
   const token = localStorage.getItem('token')
 
-  // Only send fields that OrderUpdate schema accepts
   const payload = {
+    customer_id: Number(form.customer_id) || null,
+    vehicle_id: Number(form.vehicle_id) || null,
+    salesperson_id: Number(form.salesperson_id) || null,
+    deposit_amount: form.deposit_amount ? Number(form.deposit_amount) : null,
+    deposit_receipt_referrence_number: form.deposit_receipt_referrence_number || null,
+    order_date: form.order_date ? `${form.order_date}T00:00:00.000Z` : null,
+    expected_delivery_date: form.expected_delivery_date ? `${form.expected_delivery_date}T00:00:00.000Z` : null,
+    port_to_be_shipped: form.port_to_be_shipped || null,
     status: form.status || null,
     signed_by_seller: form.signed_by_seller,
     signed_by_customer: form.signed_by_customer,
     accounts_approved: form.accounts_approved,
+    accounts_approval_date: form.accounts_approval_date ? `${form.accounts_approval_date}T00:00:00.000Z` : null,
+    seller_sign_date: form.seller_sign_date ? `${form.seller_sign_date}T00:00:00.000Z` : null,
+    customer_sign_date: form.customer_sign_date ? `${form.customer_sign_date}T00:00:00.000Z` : null,
   }
 
-  const response = await fetch(`${API_BASE}/orders/${orderId.value}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  })
+  try {
+    const response = await fetch(`${API_BASE}/orders/${orderId.value}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    })
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error('Failed to update order:', errorText)
-    return
+    if (!response.ok) {
+      errorMessage.value = await getResponseErrorMessage(response, 'Unable to update the order.')
+      return
+    }
+
+    await router.push('/orders')
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Unable to update the order.'
+  } finally {
+    isSaving.value = false
   }
-
-  router.push('/orders')
 }
 
 onMounted(async () => {
   if (orderId.value) {
-    await Promise.all([fetchOrder(), fetchOrderFiles()])
+    await Promise.all([fetchOrder(), fetchOrderFiles(), fetchOptions()])
   }
 })
 </script>

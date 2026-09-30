@@ -168,6 +168,7 @@ import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { API_BASE } from '@/config'
+import { getApiErrorMessage, isValidEmail } from '@/utils/validation'
 
 const username = ref('')
 const email = ref('')
@@ -183,6 +184,19 @@ const togglePasswordVisibility = () => {
 
 const handleSubmit = async () => {
   if (isSubmitting.value) return
+
+  if (username.value.trim().length < 3) {
+    signupError.value = 'Username must be at least 3 characters.'
+    return
+  }
+  if (!isValidEmail(email.value)) {
+    signupError.value = 'Enter a valid email address.'
+    return
+  }
+  if (password.value.length < 8) {
+    signupError.value = 'Password must be at least 8 characters.'
+    return
+  }
 
   isSubmitting.value = true
   signupError.value = ''
@@ -203,7 +217,7 @@ const handleSubmit = async () => {
     const data = await response.json()
 
     if (!response.ok) {
-      signupError.value = data.detail || 'Sign up failed. Please try again.'
+      signupError.value = getApiErrorMessage(data, 'Sign up failed. Please try again.')
       return
     }
 

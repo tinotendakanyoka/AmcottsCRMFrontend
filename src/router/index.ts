@@ -146,6 +146,15 @@ const router = createRouter({
       },
     },
     {
+      path: '/vehicles',
+      name: 'Vehicles',
+      component: () => import('../views/Vehicles/Vehicles.vue'),
+      meta: {
+        title: 'Vehicles',
+        requiresAuth: true,
+      },
+    },
+    {
       path: '/buttons',
       name: 'Buttons',
       component: () => import('../views/UiElements/Buttons.vue'),

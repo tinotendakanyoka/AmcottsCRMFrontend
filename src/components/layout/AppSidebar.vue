@@ -266,6 +266,11 @@ const menuGroups: MenuGroup[] = [
           { name: "View Contracts", path: "/contracts", pro: false },
         ],
       }, 
+      {
+        name: "Vehicles",
+        icon: ListIcon,
+        path: "/vehicles",
+      },
     ],
   },
 ];
